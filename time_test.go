@@ -14,7 +14,7 @@ func (o *one) Increment() {
 	*o++
 }
 
-func TestEveryTimeDo(t *testing.T) {
+func TestDo(t *testing.T) {
 	t.Parallel()
 	o := one(0)
 	e := throttle.Time{}
@@ -34,7 +34,7 @@ func TestEveryTimeDo(t *testing.T) {
 	}
 	require.EqualValues(t, 1, o)
 }
-func BenchmarkEveryTimeDo(b *testing.B) {
+func BenchmarkDo(b *testing.B) {
 	e := throttle.Time{}
 	f := func() {}
 	b.RunParallel(func(pb *testing.PB) {
@@ -43,7 +43,7 @@ func BenchmarkEveryTimeDo(b *testing.B) {
 		}
 	})
 }
-func TestEveryTimeGo(t *testing.T) {
+func TestGo(t *testing.T) {
 	t.Parallel()
 	o := one(0)
 	e := throttle.Time{}
@@ -56,7 +56,7 @@ func TestEveryTimeGo(t *testing.T) {
 	time.Sleep(time.Millisecond)
 	require.EqualValues(t, 1, o)
 }
-func BenchmarkEveryTimeGo(b *testing.B) {
+func BenchmarkGo(b *testing.B) {
 	e := throttle.Time{}
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
@@ -64,7 +64,7 @@ func BenchmarkEveryTimeGo(b *testing.B) {
 		}
 	})
 }
-func TestEveryTimeDoZeroTTL(t *testing.T) {
+func TestDoZeroD(t *testing.T) {
 	t.Parallel()
 	o := one(0)
 	e := throttle.Time{}
@@ -85,7 +85,7 @@ func TestEveryTimeDoZeroTTL(t *testing.T) {
 	require.LessOrEqual(t, 1, o)
 	require.GreaterOrEqual(t, n, o)
 }
-func TestEveryTimeGoZeroTTL(t *testing.T) {
+func TestGoZeroD(t *testing.T) {
 	t.Parallel()
 	o := one(0)
 	e := throttle.Time{}
@@ -105,4 +105,13 @@ func TestEveryTimeGoZeroTTL(t *testing.T) {
 	}
 	require.LessOrEqual(t, 1, o)
 	require.GreaterOrEqual(t, n, o)
+}
+func TestGoFirstSync(t *testing.T) {
+	t.Parallel()
+	o := one(0)
+	e := throttle.Time{}
+	e.Go(0, func() {
+		o.Increment()
+	})
+	require.EqualValues(t, 1, o)
 }

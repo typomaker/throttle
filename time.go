@@ -54,6 +54,12 @@ func (it *Time) Go(d time.Duration, fn func()) {
 		it.m.Unlock()
 		return
 	}
+	if last == 0 {
+		fn()
+		it.n.Store(next)
+		it.m.Unlock()
+		return
+	}
 	go func() {
 		fn()
 		it.n.Store(next)
