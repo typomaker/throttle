@@ -7,16 +7,10 @@ import (
 	"github.com/typomaker/throttle"
 )
 
-type one int
-
-func (o *one) Increment() {
-	*o++
-}
-
-func TestTimeDo(t *testing.T) {
+func TestTickDo(t *testing.T) {
 	t.Parallel()
 	o := one(0)
-	e := throttle.Time{}
+	e := throttle.Tick{}
 	c := make(chan bool)
 
 	const n = 100
@@ -34,9 +28,9 @@ func TestTimeDo(t *testing.T) {
 	require.LessOrEqual(t, 1, o)
 }
 
-func BenchmarkTimeDo(b *testing.B) {
+func BenchmarkTickDo(b *testing.B) {
 	o := one(0)
-	e := throttle.Time{}
+	e := throttle.Tick{}
 	f := func() { o.Increment() }
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
@@ -45,10 +39,10 @@ func BenchmarkTimeDo(b *testing.B) {
 	})
 }
 
-func TestTimeGo(t *testing.T) {
+func TestTickGo(t *testing.T) {
 	t.Parallel()
 	o := one(0)
-	e := throttle.Time{}
+	e := throttle.Tick{}
 	c := make(chan bool)
 
 	const n = 10
@@ -66,20 +60,20 @@ func TestTimeGo(t *testing.T) {
 	require.LessOrEqual(t, 1, o)
 }
 
-func BenchmarkTimeGo(b *testing.B) {
+func BenchmarkTickGo(b *testing.B) {
 	o := one(0)
 	f := func() { o.Increment() }
-	e := throttle.Time{}
+	e := throttle.Tick{}
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			e.Go(10, f)
 		}
 	})
 }
-func TestTimeGoFirstSync(t *testing.T) {
+func TestTickGoFirstSync(t *testing.T) {
 	t.Parallel()
 	o := one(0)
-	e := throttle.Time{}
+	e := throttle.Tick{}
 	e.Go(0, func() {
 		o.Increment()
 	})
