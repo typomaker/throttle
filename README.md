@@ -11,8 +11,8 @@
 - [📝 Table of Contents](#-table-of-contents)
 - [🧐 About ](#-about-)
 - [🏁 Getting Started ](#-getting-started-)
-    - [Prerequisites](#prerequisites)
-    - [Installing](#installing)
+	- [Prerequisites](#prerequisites)
+	- [Installing](#installing)
 - [🎈 Usage ](#-usage-)
 
 ## 🧐 About <a name = "about"></a>
@@ -32,7 +32,6 @@ go version 1.25
 go get github.com/typomaker/throttle
 ```
 ## 🎈 Usage <a name="usage"></a>
-
 ```go
 package main
 

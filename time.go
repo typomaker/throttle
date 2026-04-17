@@ -11,7 +11,7 @@ type Time struct {
 	m sync.Mutex
 }
 
-// Go calls fn every interval of d.
+// Go invokes the fn function no more than once for each time interval d.
 // Caller is waiting for completion of the fn.
 // On the first call, all the callers are waits until the fn is completed
 func (it *Time) Do(d time.Duration, fn func()) {
@@ -35,7 +35,7 @@ func (it *Time) Do(d time.Duration, fn func()) {
 	it.m.Unlock()
 }
 
-// Go calls fn every interval of d.
+// Go invokes the fn function no more than once for each time interval d.
 // Caller isn't waiting for completion of the fn.
 // On the first call, all the callers are waits until the fn is completed
 func (it *Time) Go(d time.Duration, fn func()) {

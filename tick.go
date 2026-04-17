@@ -11,7 +11,7 @@ type Tick struct {
 	m sync.Mutex
 }
 
-// Go calls fn every interval of d.
+// Do invokes the fn function no more than once every n calls.
 // Caller is waiting for completion of the fn.
 // On the first call, all the callers are waits until the fn is completed
 func (it *Tick) Do(d int, fn func()) {
@@ -35,7 +35,7 @@ func (it *Tick) Do(d int, fn func()) {
 	it.m.Unlock()
 }
 
-// Go calls the fn function no more than once every n calls.
+// Go invokes the fn function no more than once every n calls.
 // Caller isn't waiting for completion of the fn.
 // On the first call, all the callers are waits until the fn is completed
 func (it *Tick) Go(d int, fn func()) {
