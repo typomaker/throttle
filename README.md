@@ -55,3 +55,31 @@ func main() {
 	}
 }
 ```
+
+## First-run behavior
+
+`Do` executes the handler synchronously. `Go` executes it in a goroutine,
+including the first run. Concurrent calls skip an active handler.
+
+Use `DoWait` or `GoWait` when callers must wait for initialization:
+
+```go
+var cache throttle.Time
+cache.GoWait(time.Minute, loadCache)
+```
+
+Both methods execute the first handler synchronously and block concurrent
+waiting calls until it completes successfully. Subsequent `DoWait` runs are
+synchronous; subsequent `GoWait` runs execute in a goroutine. After initialization,
+concurrent calls skip active runs as usual. The same methods exist on `Tick`. All its methods admit the first call immediately;
+subsequent intervals count calls from the last successful run, including calls
+skipped while a handler is active.
+Use waiting methods consistently for callers that require initialization.
+
+Panics propagate to the caller (or the executing goroutine). The lock is released,
+and a panicking handler is not recorded as a successful run. Waiting callers can
+retry initialization.
+
+`Time` and `Tick` must not be copied after first use. Callers and their handlers
+are responsible for synchronizing user data. During initialization, a handler
+must not recursively call `DoWait` or `GoWait` on the same instance: this deadlocks.
