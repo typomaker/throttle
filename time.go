@@ -20,41 +20,45 @@ type Time struct {
 // Do invokes fn at most once per interval d.
 // Concurrent calls skip an active run, including during initialization.
 // The caller waits for its own run to complete.
-func (it *Time) Do(d time.Duration, fn func()) {
+// It returns true if fn completes normally, or false if the call is skipped.
+func (it *Time) Do(d time.Duration, fn func()) bool {
 	last := it.n.Load()
 	now := time.Since(timeOrigin).Nanoseconds() + 1
 	if last != 0 && now-last < int64(d) {
-		return
+		return false
 	}
 	if !it.m.TryLock() {
-		return
+		return false
 	}
 	if it.n.Load() != last {
 		it.m.Unlock()
-		return
+		return false
 	}
 	defer it.m.Unlock()
 	// Reserve zero for instances with no successful runs.
 	next := time.Since(timeOrigin).Nanoseconds() + 1
 	fn()
 	it.n.Store(next)
+	return true
 }
 
 // Go invokes fn at most once per interval d.
 // Concurrent calls skip an active run, including during initialization.
 // Every run executes in a goroutine.
-func (it *Time) Go(d time.Duration, fn func()) {
+// It returns true if fn is scheduled, or false if the call is skipped.
+// A true result does not confirm completion.
+func (it *Time) Go(d time.Duration, fn func()) bool {
 	last := it.n.Load()
 	now := time.Since(timeOrigin).Nanoseconds() + 1
 	if last != 0 && now-last < int64(d) {
-		return
+		return false
 	}
 	if !it.m.TryLock() {
-		return
+		return false
 	}
 	if it.n.Load() != last {
 		it.m.Unlock()
-		return
+		return false
 	}
 	// Reserve zero for instances with no successful runs.
 	next := time.Since(timeOrigin).Nanoseconds() + 1
@@ -63,6 +67,7 @@ func (it *Time) Go(d time.Duration, fn func()) {
 		fn()
 		it.n.Store(next)
 	}()
+	return true
 }
 
 // DoWait invokes fn at most once per interval d.
@@ -72,20 +77,22 @@ func (it *Time) Go(d time.Duration, fn func()) {
 // Subsequent runs execute synchronously.
 // During initialization, fn must not recursively call DoWait or GoWait
 // on the same instance: doing so deadlocks.
-func (it *Time) DoWait(d time.Duration, fn func()) {
+// It returns true after running or waiting for initialization; afterwards it
+// returns the result of Do.
+func (it *Time) DoWait(d time.Duration, fn func()) bool {
 	if it.n.Load() != 0 {
-		it.Do(d, fn)
-		return
+		return it.Do(d, fn)
 	}
 	it.m.Lock()
 	defer it.m.Unlock()
 	if it.n.Load() != 0 {
-		return
+		return true
 	}
 	// Reserve zero for instances with no successful runs.
 	next := time.Since(timeOrigin).Nanoseconds() + 1
 	fn()
 	it.n.Store(next)
+	return true
 }
 
 // GoWait invokes fn at most once per interval d.
@@ -95,18 +102,20 @@ func (it *Time) DoWait(d time.Duration, fn func()) {
 // Subsequent runs execute in a goroutine.
 // During initialization, fn must not recursively call DoWait or GoWait
 // on the same instance: doing so deadlocks.
-func (it *Time) GoWait(d time.Duration, fn func()) {
+// It returns true after running or waiting for initialization; afterwards it
+// returns the result of Go.
+func (it *Time) GoWait(d time.Duration, fn func()) bool {
 	if it.n.Load() != 0 {
-		it.Go(d, fn)
-		return
+		return it.Go(d, fn)
 	}
 	it.m.Lock()
 	defer it.m.Unlock()
 	if it.n.Load() != 0 {
-		return
+		return true
 	}
 	// Reserve zero for instances with no successful runs.
 	next := time.Since(timeOrigin).Nanoseconds() + 1
 	fn()
 	it.n.Store(next)
+	return true
 }

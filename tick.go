@@ -18,46 +18,51 @@ type Tick struct {
 // counted from the last successful run, including calls skipped during execution.
 // Concurrent calls skip an active run, including during initialization.
 // The caller waits for its own run to complete.
-func (it *Tick) Do(d int, fn func()) {
+// It returns true if fn completes normally, or false if the call is skipped.
+func (it *Tick) Do(d int, fn func()) bool {
 	last := it.n.Load()
 	next := it.c.Add(1)
 	if last != 0 && next-last < int64(d) {
-		return
+		return false
 	}
 	if !it.m.TryLock() {
-		return
+		return false
 	}
 	if it.n.Load() != last {
 		it.m.Unlock()
-		return
+		return false
 	}
 	defer it.m.Unlock()
 	fn()
 	it.n.Store(next)
+	return true
 }
 
 // Go invokes fn on the first call, then at most once per d calls
 // counted from the last successful run, including calls skipped during execution.
 // Concurrent calls skip an active run, including during initialization.
 // Every run executes in a goroutine.
-func (it *Tick) Go(d int, fn func()) {
+// It returns true if fn is scheduled, or false if the call is skipped.
+// A true result does not confirm completion.
+func (it *Tick) Go(d int, fn func()) bool {
 	last := it.n.Load()
 	next := it.c.Add(1)
 	if last != 0 && next-last < int64(d) {
-		return
+		return false
 	}
 	if !it.m.TryLock() {
-		return
+		return false
 	}
 	if it.n.Load() != last {
 		it.m.Unlock()
-		return
+		return false
 	}
 	go func() {
 		defer it.m.Unlock()
 		fn()
 		it.n.Store(next)
 	}()
+	return true
 }
 
 // DoWait invokes fn on the first call, then at most once per d calls
@@ -68,19 +73,21 @@ func (it *Tick) Go(d int, fn func()) {
 // Subsequent runs execute synchronously.
 // During initialization, fn must not recursively call DoWait or GoWait
 // on the same instance: doing so deadlocks.
-func (it *Tick) DoWait(d int, fn func()) {
+// It returns true after running or waiting for initialization; afterwards it
+// returns the result of Do.
+func (it *Tick) DoWait(d int, fn func()) bool {
 	if it.n.Load() != 0 {
-		it.Do(d, fn)
-		return
+		return it.Do(d, fn)
 	}
 	next := it.c.Add(1)
 	it.m.Lock()
 	defer it.m.Unlock()
 	if it.n.Load() != 0 {
-		return
+		return true
 	}
 	fn()
 	it.n.Store(next)
+	return true
 }
 
 // GoWait invokes fn on the first call, then at most once per d calls
@@ -91,17 +98,19 @@ func (it *Tick) DoWait(d int, fn func()) {
 // Subsequent runs execute in a goroutine.
 // During initialization, fn must not recursively call DoWait or GoWait
 // on the same instance: doing so deadlocks.
-func (it *Tick) GoWait(d int, fn func()) {
+// It returns true after running or waiting for initialization; afterwards it
+// returns the result of Go.
+func (it *Tick) GoWait(d int, fn func()) bool {
 	if it.n.Load() != 0 {
-		it.Go(d, fn)
-		return
+		return it.Go(d, fn)
 	}
 	next := it.c.Add(1)
 	it.m.Lock()
 	defer it.m.Unlock()
 	if it.n.Load() != 0 {
-		return
+		return true
 	}
 	fn()
 	it.n.Store(next)
+	return true
 }

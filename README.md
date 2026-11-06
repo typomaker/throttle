@@ -34,6 +34,21 @@ initialization waiting in `DoWait` and `GoWait`.
 Methods on the same instance share the same execution history and lock.
 Use a separate instance for each independently throttled operation.
 
+## Return values
+
+All methods return a `bool`:
+
+- `Do`: `true` after the handler returns normally; `false` if skipped.
+- `Go`: `true` if a goroutine was scheduled; `false` if skipped. It does not
+  report handler completion or success.
+- `DoWait` and `GoWait`: `true` if this call ran the initial handler or waited
+  for another caller to initialize successfully. After initialization they
+  return the result of `Do` or `Go`, including `false` on skipped calls.
+
+A synchronous panic propagates without returning a result. Existing calls may
+ignore the result; method values assigned to function types must include the
+new `bool` return value.
+
 ## Time intervals
 
 Pass a `time.Duration` to limit how often a handler can start:

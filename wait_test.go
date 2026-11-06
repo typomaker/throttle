@@ -27,7 +27,9 @@ func TestTimeDoSkipsActiveFirstRun(t *testing.T) {
 	await(t, entered)
 	returned := make(chan struct{})
 	go func() {
-		v.Do(0, func() { t.Error("concurrent handler must be skipped") })
+		if got := v.Do(0, func() { t.Error("concurrent handler must be skipped") }); got != false {
+			t.Errorf("concurrent call returned %v, want false", got)
+		}
 		close(returned)
 	}()
 	await(t, returned)
@@ -52,7 +54,9 @@ func TestTimeGoSkipsActiveFirstRun(t *testing.T) {
 	await(t, entered)
 	returned := make(chan struct{})
 	go func() {
-		v.Go(0, func() { t.Error("concurrent handler must be skipped") })
+		if got := v.Go(0, func() { t.Error("concurrent handler must be skipped") }); got != false {
+			t.Errorf("concurrent call returned %v, want false", got)
+		}
 		close(returned)
 	}()
 	await(t, returned)
@@ -73,7 +77,9 @@ func TestTimeDoWaitWaitsForInitialization(t *testing.T) {
 	await(t, entered)
 	returned := make(chan struct{})
 	go func() {
-		v.DoWait(0, func() { t.Error("concurrent handler must be skipped") })
+		if got := v.DoWait(0, func() { t.Error("concurrent handler must be skipped") }); got != true {
+			t.Errorf("concurrent call returned %v, want true", got)
+		}
 		close(returned)
 	}()
 	select {
@@ -102,7 +108,9 @@ func TestTimeGoWaitWaitsForInitialization(t *testing.T) {
 	await(t, entered)
 	returned := make(chan struct{})
 	go func() {
-		v.GoWait(0, func() { t.Error("concurrent handler must be skipped") })
+		if got := v.GoWait(0, func() { t.Error("concurrent handler must be skipped") }); got != true {
+			t.Errorf("concurrent call returned %v, want true", got)
+		}
 		close(returned)
 	}()
 	select {
@@ -131,7 +139,9 @@ func TestTickDoSkipsActiveFirstRun(t *testing.T) {
 	await(t, entered)
 	returned := make(chan struct{})
 	go func() {
-		v.Do(0, func() { t.Error("concurrent handler must be skipped") })
+		if got := v.Do(0, func() { t.Error("concurrent handler must be skipped") }); got != false {
+			t.Errorf("concurrent call returned %v, want false", got)
+		}
 		close(returned)
 	}()
 	await(t, returned)
@@ -156,7 +166,9 @@ func TestTickGoSkipsActiveFirstRun(t *testing.T) {
 	await(t, entered)
 	returned := make(chan struct{})
 	go func() {
-		v.Go(0, func() { t.Error("concurrent handler must be skipped") })
+		if got := v.Go(0, func() { t.Error("concurrent handler must be skipped") }); got != false {
+			t.Errorf("concurrent call returned %v, want false", got)
+		}
 		close(returned)
 	}()
 	await(t, returned)
@@ -177,7 +189,9 @@ func TestTickDoWaitWaitsForInitialization(t *testing.T) {
 	await(t, entered)
 	returned := make(chan struct{})
 	go func() {
-		v.DoWait(0, func() { t.Error("concurrent handler must be skipped") })
+		if got := v.DoWait(0, func() { t.Error("concurrent handler must be skipped") }); got != true {
+			t.Errorf("concurrent call returned %v, want true", got)
+		}
 		close(returned)
 	}()
 	select {
@@ -206,7 +220,9 @@ func TestTickGoWaitWaitsForInitialization(t *testing.T) {
 	await(t, entered)
 	returned := make(chan struct{})
 	go func() {
-		v.GoWait(0, func() { t.Error("concurrent handler must be skipped") })
+		if got := v.GoWait(0, func() { t.Error("concurrent handler must be skipped") }); got != true {
+			t.Errorf("concurrent call returned %v, want true", got)
+		}
 		close(returned)
 	}()
 	select {

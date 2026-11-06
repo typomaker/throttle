@@ -21,7 +21,7 @@ func TestTimeDoAfterInitialization(t *testing.T) {
 		t.Error("synchronous call returned before handler")
 	default:
 	}
-	v.Do(0, func() { t.Error("active handler must be skipped") })
+	require.False(t, v.Do(0, func() { t.Error("active handler must be skipped") }))
 	close(release)
 	await(t, returned)
 	await(t, finished)
@@ -57,7 +57,7 @@ func TestTimeGoAfterInitialization(t *testing.T) {
 	}()
 	await(t, entered)
 	await(t, returned)
-	v.Go(0, func() { t.Error("active handler must be skipped") })
+	require.False(t, v.Go(0, func() { t.Error("active handler must be skipped") }))
 	close(release)
 	await(t, returned)
 	await(t, finished)
@@ -89,7 +89,7 @@ func TestTimeDoWaitAfterInitialization(t *testing.T) {
 		t.Error("synchronous call returned before handler")
 	default:
 	}
-	v.DoWait(0, func() { t.Error("active handler must be skipped") })
+	require.False(t, v.DoWait(0, func() { t.Error("active handler must be skipped") }))
 	close(release)
 	await(t, returned)
 	await(t, finished)
@@ -125,7 +125,7 @@ func TestTimeGoWaitAfterInitialization(t *testing.T) {
 	}()
 	await(t, entered)
 	await(t, returned)
-	v.GoWait(0, func() { t.Error("active handler must be skipped") })
+	require.False(t, v.GoWait(0, func() { t.Error("active handler must be skipped") }))
 	close(release)
 	await(t, returned)
 	await(t, finished)
@@ -157,7 +157,7 @@ func TestTickDoAfterInitialization(t *testing.T) {
 		t.Error("synchronous call returned before handler")
 	default:
 	}
-	v.Do(0, func() { t.Error("active handler must be skipped") })
+	require.False(t, v.Do(0, func() { t.Error("active handler must be skipped") }))
 	close(release)
 	await(t, returned)
 	await(t, finished)
@@ -189,7 +189,7 @@ func TestTickGoAfterInitialization(t *testing.T) {
 	}()
 	await(t, entered)
 	await(t, returned)
-	v.Go(0, func() { t.Error("active handler must be skipped") })
+	require.False(t, v.Go(0, func() { t.Error("active handler must be skipped") }))
 	close(release)
 	await(t, returned)
 	await(t, finished)
@@ -217,7 +217,7 @@ func TestTickDoWaitAfterInitialization(t *testing.T) {
 		t.Error("synchronous call returned before handler")
 	default:
 	}
-	v.DoWait(0, func() { t.Error("active handler must be skipped") })
+	require.False(t, v.DoWait(0, func() { t.Error("active handler must be skipped") }))
 	close(release)
 	await(t, returned)
 	await(t, finished)
@@ -249,7 +249,7 @@ func TestTickGoWaitAfterInitialization(t *testing.T) {
 	}()
 	await(t, entered)
 	await(t, returned)
-	v.GoWait(0, func() { t.Error("active handler must be skipped") })
+	require.False(t, v.GoWait(0, func() { t.Error("active handler must be skipped") }))
 	close(release)
 	await(t, returned)
 	await(t, finished)
